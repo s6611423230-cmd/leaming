@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Learning Companion - No Board Classroom</title>
+    <style>
+        :root {
+            --primary-color: #4285f4;
+            --secondary-color: #f0f7ff;
+            --ai-message-color: #f0f7ff;
+            --user-message-color: #e3f2fd;
+            --border-radius: 20px;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f9f9f9;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 15px 20px;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .chat-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background-color: white;
+        }
+        
+        .message {
+            margin-bottom: 15px;
+            display: flex;
+        }
+        
+        .ai-message {
+            justify-content: flex-start;
+        }
+        
+        .user-message {
+            justify-content: flex-end;
+        }
+        
+        .message-content {
+            max-width: 70%;
+            padding: 12px 18px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .ai-message .message-content {
+            background-color: var(--ai-message-color);
+            border-bottom-left-radius: 5px;
+        }
+        
+        .user-message .message-content {
+            background-color: var(--user-message-color);
+            border-bottom-right-radius: 5px;
+        }
+        
+        .input-container {
+            padding: 15px 20px;
+            background-color: white;
+            border-top: 1px solid #eee;
+            display: flex;
+        }
+        
+        input[type="text"] {
+            flex: 1;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 30px;
+            font-size: 16px;
+            outline: none;
+        }
+        
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            margin-left: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        button:hover {
+            background-color: #3367d6;
+        }
+        
+        .quick-actions {
+            display: flex;
+            flex-wrap: wrap;
+            padding: 10px 20px;
+            background-color: white;
+            border-top: 1px solid #eee;
+        }
+        
+        .quick-action {
+            background-color: var(--secondary-color);
+            border: 1px solid var(--primary-color);
+            border-radius: 20px;
+            padding: 8px 15px;
+            margin: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        
+        .quick-action:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .subject-selector {
+            padding: 10px 20px;
+            background-color: white;
+            border-bottom: 1px solid #eee;
+            text-align: center;
+        }
+        
+        select {
+            padding: 8px 15px;
+            border-radius: 20px;
+            border: 1px solid #ddd;
+            outline: none;
+        }
+        
+        @media (max-width: 768px) {
+            .message-content {
+                max-width: 85%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>AI Learning Companion</h1>
+            <p>No Board Classroom - Personalized Learning Assistant</p>
+        </header>
+        
+        <div class="subject-selector">
+            <select id="subject-select">
+                <option value="math">คณิตศาสตร์</option>
+                <option value="science">วิทยาศาสตร์</option>
+                <option value="english">ภาษาอังกฤษ</option>
+                <option value="thai">ภาษาไทย</option>
+            </select>
+        </div>
+        
+        <div class="chat-container" id="chat-container">
+            <div class="message ai-message">
+                <div class="message-content">
+                    <p>สวัสดีครับ/ค่ะ! ฉันคือ AI Learning Companion ที่จะช่วยคุณในการเรียนแทนกระดานแบบเดิมๆ</p>
+                    <p>วันนี้ต้องการเรียนเรื่องอะไรหรือมีคำถามอะไรบ้างครับ/คะ?</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="quick-actions">
+            <div class="quick-action" data-query="อธิบายหัวข้อใหม่">อธิบายหัวข้อใหม่</div>
+            <div class="quick-action" data-query="สรุปเนื้อหา">สรุปเนื้อหา</div>
+            <div class="quick-action" data-query="แบบฝึกหัด">แบบฝึกหัด</div>
+            <div class="quick-action" data-query="ตัวอย่าง">ตัวอย่าง</div>
+        </div>
+        
+        <div class="input-container">
+            <input type="text" id="user-input" placeholder="พิมพ์คำถามหรือข้อสงสัยของคุณ...">
+            <button id="send-button">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="22" y1="2" x2="11" y2="13"></line>
+                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const chatContainer = document.getElementById('chat-container');
+            const userInput = document.getElementById('user-input');
+            const sendButton = document.getElementById('send-button');
+            const quickActions = document.querySelectorAll('.quick-action');
+            const subjectSelect = document.getElementById('subject-select');
+            
+            let currentSubject = subjectSelect.value;
+            
+            // Function to add a message to the chat
+            function addMessage(message, isUser) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = isUser ? 'message user-message' : 'message ai-message';
+                
+                const contentDiv = document.createElement('div');
+                contentDiv.className = 'message-content';
+                
+                // Handle both string and array of strings
+                if (Array.isArray(message)) {
+                    message.forEach(text => {
+                        const p = document.createElement('p');
+                        p.textContent = text;
+                        contentDiv.appendChild(p);
+                    });
+                } else {
+                    const p = document.createElement('p');
+                    p.textContent = message;
+                    contentDiv.appendChild(p);
+                }
+                
+                messageDiv.appendChild(contentDiv);
+                chatContainer.appendChild(messageDiv);
+                
+                // Scroll to bottom
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            }
+            
+            // Function to generate AI response
+            function generateAIResponse(userMessage) {
+                // This is a simplified simulation - in a real implementation,
+                // this would connect to an AI API (OpenAI, Ollama, Hugging Face)
+                
+                const subject = currentSubject;
+                const lowerMessage = userMessage.toLowerCase();
+                
+                // Sample responses based on subject and query
+                if (lowerMessage.includes('สวัสดี') || lowerMessage.includes('hello') || lowerMessage.includes('hi')) {
+                    return "สวัสดีครับ/ค่ะ! มีอะไรให้ช่วยเหลือเกี่ยวกับการเรียนไหมครับ/คะ?";
+                }
+                
+                if (lowerMessage.includes('อธิบายหัวข้อใหม่') || lowerMessage.includes('explain')) {
+                    if (subject === 'math') {
+                        return [
+                            "เรื่องที่กำลังเรียน: พีทาโกรัส",
+                            "ทฤษฎีบทพีทาโกรัสกล่าวว่าในสามเหลี่ยมมุมฉาก กำลังสองของความยาวของด้านตรงข้ามมุมฉาก (c) จะเท่ากับผลรวมของกำลังสองของความยาวของด้านประกอบมุมฉาก (a และ b)",
+                            "สูตร: a² + b² = c²",
+                            "โดยที่ c คือด้านตรงข้ามมุมฉาก (ด้านที่ยาวที่สุด)"
+                        ];
+                    } else if (subject === 'science') {
+                        return [
+                            "เรื่องที่กำลังเรียน: ระบบสุริยะ",
+                            "ระบบสุริยะประกอบด้วยดวงอาทิตย์เป็นศูนย์กลาง และมีดาวเคราะห์ 8 ดวงโคจรรอบๆ",
+                            "ดาวเคราะห์แบ่งเป็น 2 ประเภท:",
+                            "1. ดาวเคราะห์หิน (Mercury, Venus, Earth, Mars)",
+                            "2. ดาวเคราะห์แก๊ส (Jupiter, Saturn, Uranus, Neptune)",
+                            "นอกจากนี้ยังมีดาวเคราะห์แคระ, ดาวหาง, และวัตถุอื่นๆ อีกมากมาย"
+                        ];
+                    } else if (subject === 'english') {
+                        return [
+                            "เรื่องที่กำลังเรียน: Present Continuous Tense",
+                            "ใช้เพื่อพูดเกี่ยวกับการกระทำที่กำลังเกิดขึ้นในขณะนี้ หรือการกระทำที่เกิดขึ้นชั่วคราวในช่วงเวลาปัจจุบัน",
+                            "โครงสร้าง: Subject + am/is/are + verb(ing)",
+                            "ตัวอย่าง:",
+                            "- I am studying now.",
+                            "- She is watching TV at the moment.",
+                            "- They are playing football."
+                        ];
+                    } else if (subject === 'thai') {
+                        return [
+                            "เรื่องที่กำลังเรียน: ระดับภาษาไทย",
+                            "ภาษาไทยแบ่งออกเป็น 3 ระดับหลัก:",
+                            "1. ภาษาทางการ - ใช้ในเอกสารราชการ การแถลงการณ์อย่างเป็นทางการ",
+                            "2. ภาษากึ่งทางการ - ใช้ในสถานการณ์ทั่วไป แต่ยังคงความสุภาพ",
+                            "3. ภาษาไม่เป็นทางการ - ใช้กับเพื่อนหรือคนใกล้ชิด"
+                        ];
+                    }
+                }
+                
+                if (lowerMessage.includes('สรุป') || lowerMessage.includes('summary')) {
+                    if (subject === 'math') {
+                        return "สรุปพีทาโกรัส: ใช้หาความยาวด้านในสามเหลี่ยมมุมฉาก สูตร a² + b² = c² โดย c คือด้านตรงข้ามมุมฉาก ต้องจำไว้ว่าใช้ได้เฉพาะสามเหลี่ยมมุมฉากเท่านั้น";
+                    } else if (subject === 'science') {
+                        return "สรุประบบสุริยะ: ประกอบด้วยดวงอาทิตย์และดาวเคราะห์ 8 ดวงที่โคจรรอบ ดาวเคราะห์แบ่งเป็นดาวเคราะห์หิน 4 ดวงและดาวเคราะห์แก๊ส 4 ดวง โลกเป็นดาวเคราะห์ดวงที่ 3 จากดวงอาทิตย์";
+                    } else if (subject === 'english') {
+                        return "สรุป Present Continuous: ใช้กับเหตุการณ์ที่กำลังเกิดขึ้น now, at the moment โครงสร้าง Subject + am/is/are + V.ing ตัวอย่าง: I am studying English now.";
+                    } else if (subject === 'thai') {
+                        return "สรุประดับภาษา: ภาษาไทยมี 3 ระดับ คือ ทางการ (ใช้ในงานราชการ), กึ่งทางการ (ใช้ในชีวิตประจำวันอย่างสุภาพ), และไม่เป็นทางการ (ใช้กับเพื่อน)";
+                    }
+                }
+                
+                if (lowerMessage.includes('แบบฝึกหัด') || lowerMessage.includes('exercise')) {
+                    if (subject === 'math') {
+                        return [
+                            "แบบฝึกหัดพีทาโกรัส:",
+                            "1. สามเหลี่ยมมุมฉากมีด้าน a ยาว 3 ซม. และด้าน b ยาว 4 ซม. ด้าน c ยาวเท่าไร?",
+                            "2. ถ้าด้านตรงข้ามมุมฉากยาว 10 ซม. และด้านหนึ่งยาว 6 ซม. อีกด้านหนึ่งยาวเท่าไร?",
+                            "3. สามเหลี่ยมที่มีด้านยาว 5 ซม., 12 ซม. และ 13 ซม. เป็นสามเหลี่ยมมุมฉากหรือไม่? เพราะอะไร?"
+                        ];
+                    } else if (subject === 'science') {
+                        return [
+                            "แบบฝึกหัดระบบสุริยะ:",
+                            "1. ดาวเคราะห์ใดอยู่ใกล้ดวงอาทิตย์ที่สุด?",
+                            "2. ดาวเคราะห์ใดมีขนาดใหญ่ที่สุด?",
+                            "3. ดาวเคราะห์ดวงใด被称为 'ดาวเคราะห์แดง'?",
+                            "4. ดาวเคราะห์ใดมีวงแหวนที่เห็นชัดเจนที่สุด?"
+                        ];
+                    } else if (subject === 'english') {
+                        return [
+                            "แบบฝึกหัด Present Continuous:",
+                            "1. จงเปลี่ยนประโยคเหล่านี้เป็น Present Continuous:",
+                            "   - I (study) English now.",
+                            "   - She (work) at the moment.",
+                            "   - They (play) football.",
+                            "2. สร้างประโยคคำถามจากประโยคเหล่านี้:",
+                            "   - You are watching TV."
+                        ];
+                    } else if (subject === 'thai') {
+                        return [
+                            "แบบฝึกหัดระดับภาษา:",
+                            "1. ข้อความต่อไปนี้เป็นภาษาระดับใด:",
+                            "   - 'ข้าพเจ้าขอแสดงความขอบคุณ'",
+                            "   - 'ขอบคุณมากนะเพื่อน'",
+                            "   - 'ดิฉันขอขอบคุณ'",
+                            "2. เขียนประโยค 'ขอบคุณ' ในระดับภาษาต่างๆ"
+                        ];
+                    }
+                }
+                
+                if (lowerMessage.includes('ตัวอย่าง') || lowerMessage.includes('example')) {
+                    if (subject === 'math') {
+                        return [
+                            "ตัวอย่างการใช้งานพีทาโกรัส:",
+                            "ปัญหา: สามเหลี่ยมมุมฉากมีด้าน a ยาว 6 ซม. และด้าน b ยาว 8 ซม. ด้าน c ยาวเท่าไร?",
+                            "วิธีแก้: a² + b² = c² → 6² + 8² = c² → 36 + 64 = c² → 100 = c² → c = 10 ซม."
+                        ];
+                    } else if (subject === 'science') {
+                        return [
+                            "ตัวอย่างระบบสุริยะ:",
+                            "ดาวพฤหัสบดีเป็นดาวเคราะห์ที่ใหญ่ที่สุดในระบบสุริยะ มีมวลมากกว่าดาวเคราะห์อื่นๆ รวมกันถึง 2.5 เท่า มีดาวบริวารอย่างน้อย 79 ดวง"
+                        ];
+                    } else if (subject === 'english') {
+                        return [
+                            "ตัวอย่าง Present Continuous:",
+                            "1. I am studying mathematics right now.",
+                            "2. She is talking to her teacher at the moment.",
+                            "3. They are playing basketball after school."
+                        ];
+                    } else if (subject === 'thai') {
+                        return [
+                            "ตัวอย่างระดับภาษา:",
+                            "ทางการ: 'ข้าพเจ้าขออนุญาตลากลับ'",
+                            "กึ่งทางการ: 'ฉันขอตัวกลับก่อนนะคะ'",
+                            "ไม่เป็นทางการ: 'ฉันไปก่อนนะ'"
+                        ];
+                    }
+                }
+                
+                // Default response for unrecognized queries
+                return "ขอโทษด้วยครับ/ค่ะ ฉันยังไม่เข้าใจคำถามของคุณเต็มที่ ลองถามใหม่หรือเลือกจากตัวเลือกด้านล่างดูนะครับ/คะ";
+            }
+            
+            // Function to handle user message
+            function handleUserMessage() {
+                const message = userInput.value.trim();
+                if (message === '') return;
+                
+                addMessage(message, true);
+                userInput.value = '';
+                
+                // Simulate AI thinking with a delay
+                setTimeout(() => {
+                    const aiResponse = generateAIResponse(message);
+                    addMessage(aiResponse, false);
+                }, 1000);
+            }
+            
+            // Event listeners
+            sendButton.addEventListener('click', handleUserMessage);
+            
+            userInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    handleUserMessage();
+                }
+            });
+            
+            quickActions.forEach(action => {
+                action.addEventListener('click', function() {
+                    const query = this.getAttribute('data-query');
+                    userInput.value = query;
+                    handleUserMessage();
+                });
+            });
+            
+            subjectSelect.addEventListener('change', function() {
+                currentSubject = this.value;
+                addMessage(`เปลี่ยนวิชาเป็น: ${this.options[this.selectedIndex].text} แล้วครับ/ค่ะ`, false);
+            });
+        });
+    </script>
+</body>
+</html>
